@@ -8,6 +8,33 @@
 var UI = require('ui');
 var Vector2 = require('vector2');
 var ajax = require('ajax');
+var Settings = require('settings');
+
+var locked = "unlocked";
+
+var optionMenu= [
+  {
+    title: "GPS Address",
+    subtitle: "GPS to google"
+  },
+  {
+    title: "IP Address",
+    subtitle: "IP to Google"
+  },
+  {
+    title: "GPS Coords",
+    subtitle: "Show GPS Coordinates"
+  },
+  {
+    title: "Set Parking Spot",
+    subtitle: "Set displayed stall"
+  },
+  {
+    title: "Set Locked",
+    subtitle: "Did you lock it?"
+  }
+];
+
 
 // function that adds general elements to the window (top bar, icon, title, and text)
 function addElementsToWindow(window, titleText, text) {
@@ -20,11 +47,21 @@ function addElementsToWindow(window, titleText, text) {
   
   // icon
   var icon = new UI.Image({
-    position: new Vector2(100,20),
-    size: new Vector2(25,26),
+    position: new Vector2(100,13),
+    size: new Vector2(13,13),
     backgroundColor: 'clear',
     borderColor: 'clear',
-    image: 'images/qbo_icon.png'
+    image: 'images/smallcar.png'
+  });
+  
+  
+  // icon
+  var lockedicon = new UI.Image({
+    position: new Vector2(10,13),
+    size: new Vector2(13,13),
+    backgroundColor: 'clear',
+    borderColor: 'clear',
+    image: 'images/locked.png'
   });
   
   // Title text
@@ -56,65 +93,318 @@ function addElementsToWindow(window, titleText, text) {
   window.add(title);
   window.add(subtext);
   window.add(icon);
+  if (locked === "locked")
+  {
+      window.add(lockedicon);
+  }
 }
+
+function showLocked(window) {
+       
+      
+      if (locked == "locked")
+      {
+        var text = new UI.Text({
+        position: new Vector2(10, 60),
+        size: new Vector2(144, 108),
+        text: "locked",
+        font:'gothic-24',
+        color:'black',
+        textOverflow:'wrap',
+        textAlign:'left',
+        backgroundColor:'white'
+        });
+        console.log('i plan to show locked...');
+        window.add(text);
+        
+      } else {
+          var text2 = new UI.Text({
+          position: new Vector2(10, 60),
+          size: new Vector2(144, 108),
+          text: "unlocked",
+          font:'gothic-24',
+          color:'black',
+          textOverflow:'wrap',
+          textAlign:'left',
+          backgroundColor:'white'
+          });
+        console.log('i plan to show unlocked...');
+          window.add(text2);
+      }
+}
+
+var locationOptions = {
+  enableHighAccuracy: true, 
+  maximumAge: 10000, 
+  timeout: 10000
+};
+
+function locationSuccess(pos) {
+  console.log('lat= ' + pos.coords.latitude + ' lon= ' + pos.coords.longitude);
+}
+
+function locationError(err) {
+  console.log('location error (' + err.code + '): ' + err.message);
+}
+
+// Make an asynchronous request
+navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
 
 // Create the home screen
 var home = new UI.Window();
 addElementsToWindow(home, 'Overdue Invoices', 'Loading...');
 home.show();
 
-// Construct URL
-var URL = 'https://www.itduzzit.com/cosmon/api/overdue-invoices-with-pages.json?daysOverdue=30&token=your_token&senderId=0';
 
+// Create the Menu, supplying the list of choices
+var displayMenu = new UI.Menu({
+  sections: [{
+    title: 'Address List',
+    items: optionMenu
+  }]
+});
+
+// Add a click listener for select button click
+displayMenu.on('select', function(event) {
+    var stitle = optionMenu[event.itemIndex].title;
+    var sbody = optionMenu[event.itemIndex].subtitle;
+  
+    if (event.itemIndex === 0)
+    {
+       //Try and ask our GeoLocation and print the Lat and Long
+      navigator.geolocation.getCurrentPosition(
+       function(loc) {
+        console.log("lat is " + loc.coords.latitude + " and long is " + loc.coords.longitude );
+        
+        var GURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + loc.coords.latitude + "," + loc.coords.longitude + "&key=AIzaSyD51aJRxs-vxk5QpyuSgSg7YsmFBU3aATQ";
+        ajax(
+          {
+            url: GURL,
+            type: 'json'
+          },
+          function(data)
+          {
+            console.log('got google api data for ' + GURL);
+            console.log('m2:' + data.results[0].formatted_address);
+            
+            // Show a card with clicked item details
+            var detailCard = new UI.Card({
+                 title: stitle,
+                 body: data.results[0].formatted_address
+            });
+          
+            // Show the new Card
+            detailCard.show();
+            
+          }
+        );
+        
+        //addElementsToWindow(home, loc.coords.latitude, loc.coords.longitude);
+      });
+      
+      
+    } else if (event.itemIndex === 1) {
+  
+      // Try and use the reverse lookup by IP to determine Lat and Long
+      var tURL = 'http://www.telize.com/geoip?callback=';
+      ajax(
+        {
+          url: tURL,
+          type: 'json'
+        },
+        function(data) {
+          // Success!
+          console.log('Successfully fetched data!');
+      
+          // dont need it now
+          // var ip = data.ip;
+          var iplat = data.latitude;
+          var iplng = data.longitude;
+       
+          var GURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + iplat + "," + iplng + "&key=AIzaSyD51aJRxs-vxk5QpyuSgSg7YsmFBU3aATQ";
+          ajax(
+            {
+              url: GURL,
+              type: 'json'
+            },
+            function(data)
+            {
+              console.log('got google api data for ' + GURL);
+              console.log('m2:' + data.results[0].formatted_address);
+              
+              // Show a card with clicked item details
+              var detailCard = new UI.Card({
+                   title: stitle,
+                   body: data.results[0].formatted_address
+              });
+            
+              // Show the new Card
+              detailCard.show();
+              
+            }
+          );
+        });
+    } else if (event.itemIndex === 2) {
+      
+       //Try and ask our GeoLocation and print the Lat and Long
+      navigator.geolocation.getCurrentPosition(
+       function(loc) {
+        console.log("lat is " + loc.coords.latitude + " and long is " + loc.coords.longitude );
+        
+       
+         // Show a card with clicked item details
+         var detailCard = new UI.Card({
+           title: stitle,
+           body: loc.coords.latitude + ", " + loc.coords.longitude
+         });
+
+         // Show the new Card
+         detailCard.show();
+
+       });
+ //   } else if (event.itemIndex === 3) {
+      // parking spot
+      
+      
+
+    } else if (event.itemIndex === 4) {
+      
+      var lockedCard = new UI.Card({
+        title: stitle,
+        body: sbody
+      });
+      
+      // Show the new Card
+      lockedCard.show();
+      
+      // set locked
+      showLocked(lockedCard);
+      
+      
+       lockedCard.on('click', 'select', function(e){
+      
+          if (locked == "locked")
+          {
+              //Settings.option('locked', null);
+              locked = "unlocked";
+          } else {
+              //Settings.option('locked', "locked");
+              locked = "locked";
+          }
+            
+        showLocked(lockedCard);
+       });
+      
+    } else {
+      // uncaught
+      var detailCard2 = new UI.Card({
+        title: stitle,
+        body: sbody
+      });
+
+      // Show the new Card
+      detailCard2.show();
+    }
+          
+});
+
+// Construct URL
+//var URL = 'https://www.itduzzit.com/cosmon/api/overdue-invoices-with-pages.json?daysOverdue=30&token=27vum638vrn48w2&senderId=0';
+
+//var URL = 'http://www.telize.com/geoip?callback=';
 // Make the request
-ajax(
-  {
-    url: URL,
-    type: 'json'
-  },
-  function(data) {
+
+console.log("starting up...");
+
+//ajax(
+//  {
+//    url: URL,
+//    type: 'json'
+//  },
+//  function(data) {
     // Success!
     console.log('Successfully fetched data!');
 
-    // Create text that consists of message. Position this to replace 'Loading...' text.
-    var text = new UI.Text({
-      position: new Vector2(10, 60),
-      size: new Vector2(144, 108),
-      text:data.message,
-      font:'gothic-24',
-      color:'black',
-      textOverflow:'wrap',
-      textAlign:'left',
-      backgroundColor:'white'
-    });
-    home.add(text);
+//    var ip = data.ip;
+//    var iplat = data.latitude;
+//    var iplng = data.longitude;
+    
+    //Try and ask our GeoLocation and print the Lat and Long
+    navigator.geolocation.getCurrentPosition(
+      function(loc) {
+        console.log("lat is " + loc.coords.latitude + " and long is " + loc.coords.longitude );
+        
+        var GURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + loc.coords.latitude + "," + loc.coords.longitude + "&key=AIzaSyD51aJRxs-vxk5QpyuSgSg7YsmFBU3aATQ";
+        ajax(
+          {
+            url: GURL,
+            type: 'json'
+          },
+          function(data)
+          {
+            console.log('got google api data for ' + GURL);
+            console.log('m2:' + data.results[0].formatted_address);
+          }
+        );
+        //addElementsToWindow(home, "GPS: ", loc.coords.latitude + "," + loc.coords.longitude);
+        addElementsToWindow(home, "Parking: ", "B 6");
+      });
+    
     
     //add subscreens for individual invoice details
     home.on('click', 'select', function(e){
-      var newScreen = new UI.Window();
+//      var newScreen = new UI.Window();
       var pos = 0;
-      addElementsToWindow(newScreen, data.overdueAccounts[0].accountCustomerName, data.overdueAccounts[0].accountBalanceDue);
-      newScreen.show();
+      //addElementsToWindow(newScreen, data.overdueAccounts[0].accountCustomerName, data.overdueAccounts[0].accountBalanceDue);
+//      addElementsToWindow(newScreen, ip, "locbyip: " + iplat + "," + iplng);
+//      newScreen.show();
       
+      displayMenu.show();
+ /*     
       newScreen.on('click', 'select', function(e){
         if(pos+1 < data.overdueAccounts.length){
           pos = pos+1;
-          addElementsToWindow(newScreen, data.overdueAccounts[pos].accountCustomerName, data.overdueAccounts[pos].accountBalanceDue);
+          //addElementsToWindow(newScreen, data.overdueAccounts[pos].accountCustomerName, data.overdueAccounts[pos].accountBalanceDue);
+          addElementsToWindow(newScreen, data.ip, data.latitude);
         }
       });
-      newScreen.on('click', 'back', function(e){
+      */
+//      newScreen.on('click', 'back', function(e){
+      displayMenu.on('click', 'back', function(e){
         if(pos-1 >= 0) {
           pos = pos-1;
-          addElementsToWindow(newScreen, data.overdueAccounts[pos].accountCustomerName, data.overdueAccounts[pos].accountBalanceDue);
+          //addElementsToWindow(newScreen, data.overdueAccounts[pos].accountCustomerName, data.overdueAccounts[pos].accountBalanceDue);
+        //  addElementsToWindow(newScreen, ip, "locbyip: " + iplat + "," + iplng);
+          
+          navigator.geolocation.getCurrentPosition(
+            function(loc) {
+              console.log("lat is " + loc.coords.latitude + " and long is " + loc.coords.longitude );
+              
+              var GURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + loc.coords.latitude + "," + loc.coords.longitude + "&key=AIzaSyD51aJRxs-vxk5QpyuSgSg7YsmFBU3aATQ";
+              ajax(
+                {
+                  url: GURL,
+                  type: 'json'
+                },
+                function(data)
+                {
+                  console.log('got google api data for ' + GURL);
+                  console.log('m2:' + data.results[0].formatted_address);
+                }
+              );
+              //addElementsToWindow(displayMenu, loc.coords.latitude, loc.coords.longitude);
+        addElementsToWindow(displayMenu, "Parking: ", "B 6");
+            });
+          
         } else{
-          newScreen.hide();
+          displayMenu.hide();
         }
       });
     });
   
-  },
-  function(error) {
+//  },
+//  function(error) {
     // Failure!
-    console.log('Failed fetching data: ' + error);
-  }
-);
+//    console.log('Failed fetching data: ' + error);
+//  }
+//);

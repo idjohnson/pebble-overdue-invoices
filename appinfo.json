@@ -1,10 +1,10 @@
 {
     "appKeys": {},
     "capabilities": [
-        ""
+        "location"
     ],
     "companyName": "IntuitWear",
-    "longName": "IntuitWear",
+    "longName": "DudeWheresMyCar",
     "projectType": "pebblejs",
     "resources": {
         "media": [
@@ -29,14 +29,24 @@
                 "type": "font"
             },
             {
-                "file": "images/qbo_icon.png",
+                "file": "images/locked.png",
+                "name": "IMAGES_LOCKED_PNG",
+                "type": "png"
+            },
+            {
+                "file": "images/smallcar.png",
                 "menuIcon": true,
+                "name": "IMAGES_SMALLCAR_PNG",
+                "type": "png"
+            },
+            {
+                "file": "images/qbo_icon.png",
                 "name": "IMAGES_QBO_ICON_PNG",
                 "type": "png"
             }
         ]
     },
-    "shortName": "IntuitWear",
+    "shortName": "DWMC",
     "uuid": "5e5913b1-3eb8-4b64-965f-bc69a4938489",
     "versionCode": 1,
     "versionLabel": "1.0",
