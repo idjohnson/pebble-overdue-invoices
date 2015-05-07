@@ -93,29 +93,34 @@ function addElementsToWindow(window, titleText, text) {
   window.add(title);
   window.add(subtext);
   window.add(icon);
-  if (locked === "locked")
-  {
+   var key = 5;
+  // Persist read a key's value. May be null!
+   var value = localStorage.getItem(key);
+      
+      if (value == "locked")
+      {
       window.add(lockedicon);
   }
 }
 
 function showLocked(window) {
-       
+
+  var key = 5;
+  // Persist read a key's value. May be null!
+   var value = localStorage.getItem(key);
       
-      if (locked == "locked")
+      if (value == "locked")
       {
-        var text = new UI.Text({
-        position: new Vector2(10, 60),
-        size: new Vector2(144, 108),
-        text: "locked",
-        font:'gothic-24',
-        color:'black',
-        textOverflow:'wrap',
-        textAlign:'left',
-        backgroundColor:'white'
-        });
+  // icon
+  var lockedicon = new UI.Image({
+    position: new Vector2(10,13),
+    size: new Vector2(13,13),
+    backgroundColor: 'clear',
+    borderColor: 'clear',
+    image: 'images/locked.png'
+  });
         console.log('i plan to show locked...');
-        window.add(text);
+        window.add(lockedicon);
         
       } else {
           var text2 = new UI.Text({
@@ -282,7 +287,7 @@ displayMenu.on('select', function(event) {
       
       
        lockedCard.on('click', 'select', function(e){
-      
+            
           if (locked == "locked")
           {
               //Settings.option('locked', null);
@@ -291,8 +296,15 @@ displayMenu.on('select', function(event) {
               //Settings.option('locked', "locked");
               locked = "locked";
           }
-            
-        showLocked(lockedCard);
+         
+         var key = 5;
+         // Persist write a key with associated value
+         localStorage.setItem(key, locked);
+           
+         lockedCard.body("is now " + locked);
+         addElementsToWindow(home, "Parking: ", "B 6");
+         
+         showLocked(lockedCard);
        });
       
     } else {
@@ -324,7 +336,11 @@ console.log("starting up...");
 //  function(data) {
     // Success!
     console.log('Successfully fetched data!');
-
+    var key = 5;
+    // Persist read a key's value. May be null!
+    var value = localStorage.getItem(key);
+    console.log("value first fetched: " + value);
+        
 //    var ip = data.ip;
 //    var iplat = data.latitude;
 //    var iplng = data.longitude;
