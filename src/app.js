@@ -8,9 +8,16 @@
 var UI = require('ui');
 var Vector2 = require('vector2');
 var ajax = require('ajax');
-var Settings = require('settings');
+//var Settings = require('settings');
+var Accel = require('ui/accel');
+var Vibe = require('ui/vibe');
 
-var locked = "unlocked";
+
+  var ParkingLetterKey = 3;
+  var ParkingNumberKey = 4;
+  var LockedKey = 5;
+
+//var locked = "unlocked";
 
 var optionMenu= [
   {
@@ -35,6 +42,195 @@ var optionMenu= [
   }
 ];
 
+function resetParking(window)
+{
+  var parkingNum = 0;
+  var parkingLet = "A";
+  localStorage.setItem(ParkingNumberKey,parkingNum);
+  localStorage.setItem(ParkingLetterKey, parkingLet);
+  presentParkingPicker(window);
+}
+function incrParkingNumber(window)
+{
+  
+  var parkingNumber = localStorage.getItem(ParkingNumberKey);
+  console.log("parking number is: " + parkingNumber);
+  if (!parkingNumber)
+  {
+    parkingNumber = 0;
+  } else if (parkingNumber === parseInt(parkingNumber, 10))
+  {
+    parkingNumber = 0;
+  } else if (parkingNumber > 999)
+  {
+    parkingNumber = 0;
+  } else {
+    parkingNumber++;
+  }
+  console.log("parking number now: " + parkingNumber);
+  localStorage.setItem(ParkingNumberKey,parkingNumber);
+  var parkingNumberUI = new UI.Text({
+    position: new Vector2(75, 65),
+    size: new Vector2(40, 50),
+    text: parkingNumber,
+    font:'Bitham-30-Black',
+    color:'black',
+    textOverflow:'wrap',
+    textAlign:'center',
+    backgroundColor:'white'
+  });
+  window.add(parkingNumberUI);
+}
+
+function incrParkingLetter(window)
+{
+  // Persist read a key's value. May be null!
+   var parkingLetter = localStorage.getItem(ParkingLetterKey);
+  if (!parkingLetter)
+    {
+      parkingLetter = "A";
+    } else {
+      if (parkingLetter === "A")
+        {
+          parkingLetter = "B";
+        } else if (parkingLetter === "B")
+        {
+          parkingLetter = "C";
+        } else if (parkingLetter === "C")
+        {
+          parkingLetter = "D";
+        } else if (parkingLetter === "D")
+        {
+          parkingLetter = "E";
+        } else if (parkingLetter === "E")
+        {
+          parkingLetter = "F";
+        } else if (parkingLetter === "F")
+        {
+          parkingLetter = "G";
+        } else if (parkingLetter === "G")
+        {
+          parkingLetter = "H";
+        } else if (parkingLetter === "H")
+        {
+          parkingLetter = "I";
+        } else if (parkingLetter === "I")
+        {
+          parkingLetter = "J";
+        } else if (parkingLetter === "J")
+        {
+          parkingLetter = "K";
+        } else if (parkingLetter === "K")
+        {
+          parkingLetter = "L";
+        } else if (parkingLetter === "L")
+        {
+          parkingLetter = "M";
+        } else if (parkingLetter === "M")
+        {
+          parkingLetter = "N";
+        } else if (parkingLetter === "N")
+        {
+          parkingLetter = "O";
+        } else if (parkingLetter === "O")
+        {
+          parkingLetter = "P";
+        } else if (parkingLetter === "P")
+        {
+          parkingLetter = "Q";
+        } else if (parkingLetter === "Q")
+        {
+          parkingLetter = "R";
+        } else if (parkingLetter === "R")
+        {
+          parkingLetter = "S";
+        } else if (parkingLetter === "S")
+        {
+          parkingLetter = "T";
+        } else if (parkingLetter === "T")
+        {
+          parkingLetter = "U";
+        } else if (parkingLetter === "U")
+        {
+          parkingLetter = "V";
+        } else if (parkingLetter === "V")
+        {
+          parkingLetter = "W";
+        } else if (parkingLetter === "W")
+        {
+          parkingLetter = "X";
+        } else if (parkingLetter === "X")
+        {
+          parkingLetter = "Y";
+        } else if (parkingLetter === "Y")
+        {
+          parkingLetter = "Z";
+        } else if (parkingLetter === "Z")
+        {
+          parkingLetter = "A";
+        } 
+    }
+    
+    localStorage.setItem(ParkingLetterKey, parkingLetter);
+  
+  //  text
+  var parkingLetterUI = new UI.Text({
+    position: new Vector2(20, 65),
+    size: new Vector2(40, 50),
+    text: parkingLetter,
+    font:'Bitham-30-Black',
+    color:'black',
+    textOverflow:'wrap',
+    textAlign:'center',
+    backgroundColor:'white'
+  });
+  window.add(parkingLetterUI);
+}
+
+// function for showing the parking selector
+function presentParkingPicker(window)
+{
+  
+  // Persist read a key's value. May be null!
+   var parkingLetter = localStorage.getItem(ParkingLetterKey);
+  if (!parkingLetter)
+    {
+      parkingLetter = "A";
+    }
+  // Persist read a key's value. May be null!
+   var parkingNumber = localStorage.getItem(ParkingNumberKey);
+  if (!parkingNumber)
+    {
+      parkingNumber = "1";
+    }
+  
+  //  text
+  var parkingLetterUI = new UI.Text({
+    position: new Vector2(20, 65),
+    size: new Vector2(40, 50),
+    text: parkingLetter,
+    font:'Bitham-30-Black',
+    color:'black',
+    textOverflow:'wrap',
+    textAlign:'center',
+    backgroundColor:'white'
+  });
+  
+  var parkingNumberUI = new UI.Text({
+    position: new Vector2(75, 65),
+    size: new Vector2(40, 50),
+    text: parkingNumber,
+    font:'Bitham-30-Black',
+    color:'black',
+    textOverflow:'wrap',
+    textAlign:'center',
+    backgroundColor:'white'
+  });
+  // Add the elements to the window
+  window.add(parkingLetterUI);
+  window.add(parkingNumberUI);
+  
+}
 
 // function that adds general elements to the window (top bar, icon, title, and text)
 function addElementsToWindow(window, titleText, text) {
@@ -93,21 +289,22 @@ function addElementsToWindow(window, titleText, text) {
   window.add(title);
   window.add(subtext);
   window.add(icon);
-   var key = 5;
+  
   // Persist read a key's value. May be null!
-   var value = localStorage.getItem(key);
+   var value = localStorage.getItem(LockedKey);
       
       if (value == "locked")
       {
       window.add(lockedicon);
   }
+  
+  presentParkingPicker(window);
 }
 
 function showLocked(window) {
 
-  var key = 5;
   // Persist read a key's value. May be null!
-   var value = localStorage.getItem(key);
+   var value = localStorage.getItem(LockedKey);
       
       if (value == "locked")
       {
@@ -152,12 +349,37 @@ function locationError(err) {
   console.log('location error (' + err.code + '): ' + err.message);
 }
 
+function toggleLocked(card) {
+            
+   var value = localStorage.getItem(LockedKey);
+          if (value == "locked")
+          {
+              //Settings.option('locked', null);
+              value = "unlocked";
+            Vibe.vibrate('short');
+          } else {
+              //Settings.option('locked', "locked");
+              value = "locked";
+            Vibe.vibrate('double');
+          }
+         
+         // Persist write a key with associated value
+         localStorage.setItem(LockedKey, value);
+           
+         card.body("is now " + value);
+         addElementsToWindow(home, "Parked: ", "");
+         
+         //showLocked(lockedCard);
+       }
+
+Accel.init();
+
 // Make an asynchronous request
 navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
 
 // Create the home screen
 var home = new UI.Window();
-addElementsToWindow(home, 'Overdue Invoices', 'Loading...');
+addElementsToWindow(home, 'Parked: ', '');
 home.show();
 
 
@@ -267,10 +489,36 @@ displayMenu.on('select', function(event) {
          detailCard.show();
 
        });
- //   } else if (event.itemIndex === 3) {
+    } else if (event.itemIndex === 3) {
       // parking spot
+      var parkingWindow = new UI.Window();
+      presentParkingPicker(parkingWindow);
+      parkingWindow.show();
+      
+      parkingWindow.on('click', 'back', function(e) {
+          //let them click back to the displayMenu...
+          parkingWindow.hide();
+          presentParkingPicker(home);
+          displayMenu.show();
+      });
       
       
+      parkingWindow.on('longClick', 'select', function(e) {
+        resetParking(parkingWindow);
+         // parkingWindow.hide();
+        //  parkingWindow.show();
+      });
+      
+      parkingWindow.on('click', 'up', function(e) {
+        incrParkingLetter(parkingWindow);
+        //  parkingWindow.hide();
+        //  parkingWindow.show();
+      });
+      parkingWindow.on('click', 'down', function(e) {
+        incrParkingNumber(parkingWindow);
+          //parkingWindow.hide();
+          //parkingWindow.show();
+      });
 
     } else if (event.itemIndex === 4) {
       
@@ -285,16 +533,24 @@ displayMenu.on('select', function(event) {
       // set locked
       showLocked(lockedCard);
       
-      
+      lockedCard.on('accelTap', function(e){
+        toggleLocked(lockedCard);
+      });
+      lockedCard.on('click', 'select', function(e){
+        toggleLocked(lockedCard);
+      });
+ /*     
        lockedCard.on('click', 'select', function(e){
             
           if (locked == "locked")
           {
               //Settings.option('locked', null);
               locked = "unlocked";
+            Vibe.vibrate('short');
           } else {
               //Settings.option('locked', "locked");
               locked = "locked";
+            Vibe.vibrate('double');
           }
          
          var key = 5;
@@ -306,7 +562,7 @@ displayMenu.on('select', function(event) {
          
          showLocked(lockedCard);
        });
-      
+      */
     } else {
       // uncaught
       var detailCard2 = new UI.Card({
@@ -328,28 +584,20 @@ displayMenu.on('select', function(event) {
 
 console.log("starting up...");
 
-//ajax(
-//  {
-//    url: URL,
-//    type: 'json'
-//  },
-//  function(data) {
-    // Success!
+
     console.log('Successfully fetched data!');
     var key = 5;
     // Persist read a key's value. May be null!
     var value = localStorage.getItem(key);
     console.log("value first fetched: " + value);
-        
-//    var ip = data.ip;
-//    var iplat = data.latitude;
-//    var iplng = data.longitude;
+
     
     //Try and ask our GeoLocation and print the Lat and Long
     navigator.geolocation.getCurrentPosition(
       function(loc) {
         console.log("lat is " + loc.coords.latitude + " and long is " + loc.coords.longitude );
         
+/*
         var GURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + loc.coords.latitude + "," + loc.coords.longitude + "&key=AIzaSyD51aJRxs-vxk5QpyuSgSg7YsmFBU3aATQ";
         ajax(
           {
@@ -362,10 +610,14 @@ console.log("starting up...");
             console.log('m2:' + data.results[0].formatted_address);
           }
         );
+        */
         //addElementsToWindow(home, "GPS: ", loc.coords.latitude + "," + loc.coords.longitude);
-        addElementsToWindow(home, "Parking: ", "B 6");
+        addElementsToWindow(home, "Parked: ", "");
       });
     
+    home.on('accelTap', function(e) {
+      console.log('Registered a tap...');
+    });
     
     //add subscreens for individual invoice details
     home.on('click', 'select', function(e){
@@ -387,6 +639,12 @@ console.log("starting up...");
       */
 //      newScreen.on('click', 'back', function(e){
       displayMenu.on('click', 'back', function(e){
+        
+        console.log("heading back now...");
+        presentParkingPicker(home);
+        
+        
+   
         if(pos-1 >= 0) {
           pos = pos-1;
           //addElementsToWindow(newScreen, data.overdueAccounts[pos].accountCustomerName, data.overdueAccounts[pos].accountBalanceDue);
@@ -409,18 +667,14 @@ console.log("starting up...");
                 }
               );
               //addElementsToWindow(displayMenu, loc.coords.latitude, loc.coords.longitude);
-        addElementsToWindow(displayMenu, "Parking: ", "B 6");
+        addElementsToWindow(displayMenu, "Parked: ", "");
             });
           
         } else{
           displayMenu.hide();
         }
       });
+      
     });
   
-//  },
-//  function(error) {
-    // Failure!
-//    console.log('Failed fetching data: ' + error);
-//  }
-//);
+
