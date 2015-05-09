@@ -4,7 +4,7 @@
         "location"
     ],
     "companyName": "IntuitWear",
-    "longName": "DudeWheresMyCar",
+    "longName": "IParkedWhere",
     "projectType": "pebblejs",
     "resources": {
         "media": [
@@ -29,6 +29,16 @@
                 "type": "font"
             },
             {
+                "file": "images/icon_hybrid-lock.png",
+                "name": "IMAGES_ICON_HYBRID_LOCK_PNG",
+                "type": "png"
+            },
+            {
+                "file": "images/icon_hybrid-unlock.png",
+                "name": "IMAGES_ICON_HYBRID_UNLOCK_PNG",
+                "type": "png"
+            },
+            {
                 "file": "images/locked.png",
                 "name": "IMAGES_LOCKED_PNG",
                 "type": "png"
@@ -46,10 +56,10 @@
             }
         ]
     },
-    "shortName": "DWMC",
+    "shortName": "IParkedWhere",
     "uuid": "5e5913b1-3eb8-4b64-965f-bc69a4938489",
     "versionCode": 1,
-    "versionLabel": "1.0",
+    "versionLabel": "0.2",
     "watchapp": {
         "watchface": false
     }

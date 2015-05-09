@@ -12,14 +12,22 @@ var ajax = require('ajax');
 var Accel = require('ui/accel');
 var Vibe = require('ui/vibe');
 
+var version = "0.0.2";
+var aBody = "Written by Isaac Johnson. Version " + version;
 
-  var ParkingLetterKey = 3;
-  var ParkingNumberKey = 4;
-  var LockedKey = 5;
-
-//var locked = "unlocked";
+var ParkingLetterKey = 3;
+var ParkingNumberKey = 4;
+var LockedKey = 5;
 
 var optionMenu= [
+  {
+    title: "Set Parking Spot",
+    subtitle: "Set displayed stall"
+  },
+  {
+    title: "Set Locked",
+    subtitle: "Did you lock it?"
+  },
   {
     title: "GPS Address",
     subtitle: "GPS to google"
@@ -33,12 +41,8 @@ var optionMenu= [
     subtitle: "Show GPS Coordinates"
   },
   {
-    title: "Set Parking Spot",
-    subtitle: "Set displayed stall"
-  },
-  {
-    title: "Set Locked",
-    subtitle: "Did you lock it?"
+    title: "About",
+    subtitle: "About this App"
   }
 ];
 
@@ -48,6 +52,7 @@ function resetParking(window)
   var parkingLet = "A";
   localStorage.setItem(ParkingNumberKey,parkingNum);
   localStorage.setItem(ParkingLetterKey, parkingLet);
+  Vibe.vibrate('short');
   presentParkingPicker(window);
 }
 function incrParkingNumber(window)
@@ -190,6 +195,12 @@ function incrParkingLetter(window)
 // function for showing the parking selector
 function presentParkingPicker(window)
 {
+  // Top rectangle to blank out the page
+  var rect = new UI.Rect({ 
+    position: new Vector2(0, 0),
+    size: new Vector2(144, 168),
+    backgroundColor:'white'
+  });
   
   // Persist read a key's value. May be null!
    var parkingLetter = localStorage.getItem(ParkingLetterKey);
@@ -205,6 +216,18 @@ function presentParkingPicker(window)
     }
   
   //  text
+  
+  var parkingDescBox = new UI.Text({
+    position: new Vector2(60, 30),
+    size: new Vector2(24, 25),
+    text: "Parking Stall:",
+    font:'Gothic-24-Black',
+    color:'black',
+    textOverflow:'wrap',
+    textAlign:'center',
+    backgroundColor:'white'
+    
+  });
   var parkingLetterUI = new UI.Text({
     position: new Vector2(20, 65),
     size: new Vector2(40, 50),
@@ -227,6 +250,7 @@ function presentParkingPicker(window)
     backgroundColor:'white'
   });
   // Add the elements to the window
+  //window.add(rect);
   window.add(parkingLetterUI);
   window.add(parkingNumberUI);
   
@@ -237,14 +261,14 @@ function addElementsToWindow(window, titleText, text) {
   // Top rectangle
   var rect = new UI.Rect({
     position: new Vector2(0, 0),
-    size: new Vector2(144, 26),
+    size: new Vector2(144, 28),
     backgroundColor:'black'
   });
   
   // icon
   var icon = new UI.Image({
-    position: new Vector2(100,13),
-    size: new Vector2(13,13),
+    position: new Vector2(100,10),
+    size: new Vector2(12,12),
     backgroundColor: 'clear',
     borderColor: 'clear',
     image: 'images/smallcar.png'
@@ -252,12 +276,20 @@ function addElementsToWindow(window, titleText, text) {
   
   
   // icon
+
   var lockedicon = new UI.Image({
-    position: new Vector2(10,13),
-    size: new Vector2(13,13),
+    position: new Vector2(10,10),
+    size: new Vector2(20,20),
     backgroundColor: 'clear',
     borderColor: 'clear',
-    image: 'images/locked.png'
+    image: 'images/icon_hybrid-lock.png'
+  });
+  var unlockedicon = new UI.Image({
+    position: new Vector2(10,10),
+    size: new Vector2(20,20),
+    backgroundColor: 'clear',
+    borderColor: 'clear',
+    image: 'images/icon_hybrid-unlock.png'
   });
   
   // Title text
@@ -293,9 +325,11 @@ function addElementsToWindow(window, titleText, text) {
   // Persist read a key's value. May be null!
    var value = localStorage.getItem(LockedKey);
       
-      if (value == "locked")
-      {
+  if (value == "locked")
+  {
       window.add(lockedicon);
+  } else {
+      window.add(unlockedicon);
   }
   
   presentParkingPicker(window);
@@ -337,8 +371,8 @@ function showLocked(window) {
 
 var locationOptions = {
   enableHighAccuracy: true, 
-  maximumAge: 10000, 
-  timeout: 10000
+  maximumAge: 100, 
+  timeout: 100
 };
 
 function locationSuccess(pos) {
@@ -351,26 +385,25 @@ function locationError(err) {
 
 function toggleLocked(card) {
             
-   var value = localStorage.getItem(LockedKey);
-          if (value == "locked")
-          {
-              //Settings.option('locked', null);
-              value = "unlocked";
-            Vibe.vibrate('short');
-          } else {
-              //Settings.option('locked', "locked");
-              value = "locked";
-            Vibe.vibrate('double');
-          }
-         
-         // Persist write a key with associated value
-         localStorage.setItem(LockedKey, value);
-           
-         card.body("is now " + value);
-         addElementsToWindow(home, "Parked: ", "");
-         
-         //showLocked(lockedCard);
-       }
+  var value = localStorage.getItem(LockedKey);
+  if (value == "locked")
+  {
+    //Settings.option('locked', null);
+    value = "unlocked";
+    Vibe.vibrate('short');
+  } else {
+    //Settings.option('locked', "locked");
+    value = "locked";
+    Vibe.vibrate('double');
+  }
+
+  // Persist write a key with associated value
+  localStorage.setItem(LockedKey, value);
+
+  card.body("is now " + value);
+  addElementsToWindow(home, "Parked: ", "");
+
+}
 
 Accel.init();
 
@@ -396,7 +429,7 @@ displayMenu.on('select', function(event) {
     var stitle = optionMenu[event.itemIndex].title;
     var sbody = optionMenu[event.itemIndex].subtitle;
   
-    if (event.itemIndex === 0)
+    if (event.itemIndex === 2)
     {
        //Try and ask our GeoLocation and print the Lat and Long
       navigator.geolocation.getCurrentPosition(
@@ -430,7 +463,7 @@ displayMenu.on('select', function(event) {
       });
       
       
-    } else if (event.itemIndex === 1) {
+    } else if (event.itemIndex === 3) {
   
       // Try and use the reverse lookup by IP to determine Lat and Long
       var tURL = 'http://www.telize.com/geoip?callback=';
@@ -471,7 +504,7 @@ displayMenu.on('select', function(event) {
             }
           );
         });
-    } else if (event.itemIndex === 2) {
+    } else if (event.itemIndex === 4) {
       
        //Try and ask our GeoLocation and print the Lat and Long
       navigator.geolocation.getCurrentPosition(
@@ -489,7 +522,7 @@ displayMenu.on('select', function(event) {
          detailCard.show();
 
        });
-    } else if (event.itemIndex === 3) {
+    } else if (event.itemIndex === 0) {
       // parking spot
       var parkingWindow = new UI.Window();
       presentParkingPicker(parkingWindow);
@@ -520,8 +553,10 @@ displayMenu.on('select', function(event) {
           //parkingWindow.show();
       });
 
-    } else if (event.itemIndex === 4) {
-      
+    } else if (event.itemIndex === 1) {
+      // Locked section 
+      var value = localStorage.getItem(LockedKey);
+      sbody = "is now " + value;
       var lockedCard = new UI.Card({
         title: stitle,
         body: sbody
@@ -531,38 +566,29 @@ displayMenu.on('select', function(event) {
       lockedCard.show();
       
       // set locked
-      showLocked(lockedCard);
+      //showLocked(lockedCard);
       
       lockedCard.on('accelTap', function(e){
-        toggleLocked(lockedCard);
+  
+          toggleLocked(lockedCard);
+        
       });
       lockedCard.on('click', 'select', function(e){
         toggleLocked(lockedCard);
       });
- /*     
-       lockedCard.on('click', 'select', function(e){
-            
-          if (locked == "locked")
-          {
-              //Settings.option('locked', null);
-              locked = "unlocked";
-            Vibe.vibrate('short');
-          } else {
-              //Settings.option('locked', "locked");
-              locked = "locked";
-            Vibe.vibrate('double');
-          }
-         
-         var key = 5;
-         // Persist write a key with associated value
-         localStorage.setItem(key, locked);
-           
-         lockedCard.body("is now " + locked);
-         addElementsToWindow(home, "Parking: ", "B 6");
-         
-         showLocked(lockedCard);
-       });
-      */
+
+    } else if (event.itemIndex === 5) {
+      // About section
+      var detailCard3 = new UI.Card({
+        title: stitle,
+        body: aBody,
+        scrollable: true
+      });
+
+      // Show the new Card
+      detailCard3.show();
+    
+      
     } else {
       // uncaught
       var detailCard2 = new UI.Card({
@@ -584,97 +610,36 @@ displayMenu.on('select', function(event) {
 
 console.log("starting up...");
 
+console.log('Successfully fetched data!');
 
-    console.log('Successfully fetched data!');
-    var key = 5;
-    // Persist read a key's value. May be null!
-    var value = localStorage.getItem(key);
-    console.log("value first fetched: " + value);
+// Persist read a key's value. May be null!
+var value = localStorage.getItem(LockedKey);
+console.log("value first fetched: " + value);
 
-    
-    //Try and ask our GeoLocation and print the Lat and Long
-    navigator.geolocation.getCurrentPosition(
-      function(loc) {
-        console.log("lat is " + loc.coords.latitude + " and long is " + loc.coords.longitude );
-        
+//Try and ask our GeoLocation and print the Lat and Long
 /*
-        var GURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + loc.coords.latitude + "," + loc.coords.longitude + "&key=AIzaSyD51aJRxs-vxk5QpyuSgSg7YsmFBU3aATQ";
-        ajax(
-          {
-            url: GURL,
-            type: 'json'
-          },
-          function(data)
-          {
-            console.log('got google api data for ' + GURL);
-            console.log('m2:' + data.results[0].formatted_address);
-          }
-        );
-        */
-        //addElementsToWindow(home, "GPS: ", loc.coords.latitude + "," + loc.coords.longitude);
-        addElementsToWindow(home, "Parked: ", "");
-      });
-    
-    home.on('accelTap', function(e) {
-      console.log('Registered a tap...');
-    });
-    
-    //add subscreens for individual invoice details
-    home.on('click', 'select', function(e){
-//      var newScreen = new UI.Window();
-      var pos = 0;
-      //addElementsToWindow(newScreen, data.overdueAccounts[0].accountCustomerName, data.overdueAccounts[0].accountBalanceDue);
-//      addElementsToWindow(newScreen, ip, "locbyip: " + iplat + "," + iplng);
-//      newScreen.show();
-      
-      displayMenu.show();
- /*     
-      newScreen.on('click', 'select', function(e){
-        if(pos+1 < data.overdueAccounts.length){
-          pos = pos+1;
-          //addElementsToWindow(newScreen, data.overdueAccounts[pos].accountCustomerName, data.overdueAccounts[pos].accountBalanceDue);
-          addElementsToWindow(newScreen, data.ip, data.latitude);
-        }
-      });
-      */
-//      newScreen.on('click', 'back', function(e){
-      displayMenu.on('click', 'back', function(e){
-        
-        console.log("heading back now...");
-        presentParkingPicker(home);
-        
-        
-   
-        if(pos-1 >= 0) {
-          pos = pos-1;
-          //addElementsToWindow(newScreen, data.overdueAccounts[pos].accountCustomerName, data.overdueAccounts[pos].accountBalanceDue);
-        //  addElementsToWindow(newScreen, ip, "locbyip: " + iplat + "," + iplng);
-          
-          navigator.geolocation.getCurrentPosition(
-            function(loc) {
-              console.log("lat is " + loc.coords.latitude + " and long is " + loc.coords.longitude );
-              
-              var GURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + loc.coords.latitude + "," + loc.coords.longitude + "&key=AIzaSyD51aJRxs-vxk5QpyuSgSg7YsmFBU3aATQ";
-              ajax(
-                {
-                  url: GURL,
-                  type: 'json'
-                },
-                function(data)
-                {
-                  console.log('got google api data for ' + GURL);
-                  console.log('m2:' + data.results[0].formatted_address);
-                }
-              );
-              //addElementsToWindow(displayMenu, loc.coords.latitude, loc.coords.longitude);
-        addElementsToWindow(displayMenu, "Parked: ", "");
-            });
-          
-        } else{
-          displayMenu.hide();
-        }
-      });
-      
-    });
+navigator.geolocation.getCurrentPosition(function(loc) {
+  console.log("lat is " + loc.coords.latitude + " and long is " + loc.coords.longitude );
+
+  addElementsToWindow(home, "Parked: ", "");
+});
+*/
+
+home.on('accelTap', function(e) {
+  console.log('Registered a tap...');
+});
+
+//add subscreens for individual invoice details
+home.on('click', 'select', function(e){
+  displayMenu.show();
+});
+
+displayMenu.on('click', 'back', function(e){
+
+  console.log("heading back now...");
+  presentParkingPicker(home);
+
+  displayMenu.hide();
+});
   
 
